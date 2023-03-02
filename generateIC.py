@@ -1,20 +1,15 @@
+##---- Initial conditions for Gadged 4 ----##
+
+# Packages
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits import mplot3d
 import h5py
 
-#1)Problem Description
-#2) Initial Conditinos: como se han generado
-#3) Resultados: comparar los resultados con la analitica, despues de cprres ña simulacion, verr como se conserva la energia cuantificar esto
+#-- Initial condition parameters --#
+# 3 Second Gas Sphere Collapse ,
+# config = selfgravity , cubic_spline_kernel , Ntype =1, evalpotential
 
-#apendices
-#A) Compilation los parametros que hemos usados para la compilacion , el scri que se haya usado para hacer la gráfica
-#B) Analysis code
-
-
-#el colapso dura 3 segundos,
-#esfera de gas, config= selfgravity, cubic_spline_kernel, Ntype=1, evalpotential
-#archivo que se llama energia total integra la energia para todas las particulas
 PartNum=32
 totalPartNum=PartNum**3
 totalMass=1
@@ -25,7 +20,7 @@ grid=Side/PartNum
 
 
 
-#con esto generamos el cubo inicial
+# With this we generate the initial cube
 XCoord=np.array([])
 YCoord=np.array([])
 ZCoord=np.array([])
@@ -40,19 +35,12 @@ for i in range(PartNum):
 XCoord=XCoord-np.median(XCoord)
 YCoord=YCoord-np.median(YCoord)
 ZCoord=ZCoord-np.median(ZCoord)
-#XCoord.shape = (totalPartNum, 1)
-#YCoord.shape = (totalPartNum, 1)
-#ZCoord.shape = (totalPartNum, 1)
-#Coordinates = np.concatenate((XCoord,YCoord,ZCoord), axis = 1)
-#fig = plt.figure()
-#ax = plt.axes(projection='3d')
-#ax.scatter(XCoord,YCoord,ZCoord, color="black", s=0.25)
-#plt.show()
 
-
+# We calculate the distance to the center of each particle
 dist= np.sqrt((XCoord)**2+(YCoord)**2+(ZCoord)**2)
 
-#con esto le estamos dando la condicion de quese quede solo con las particuls que estan dentro de la esfera
+# With this we are giving it the condition that it stays only with the particles that are
+inside the sphere
 R=Side/2
 bol=dist<=R
 x1=XCoord[bol]
@@ -60,8 +48,7 @@ x2=YCoord[bol]
 x3=ZCoord[bol]
 dist=dist[bol]
 
-#vamos a redefinir la esfera para que tenga un perfil de 1/r
-
+# Let’s redefine the sphere so that it has a profile of 1/r
 x1=x1*np.sqrt(dist)
 x2=x2*np.sqrt(dist)
 x3=x3*np.sqrt(dist)
@@ -82,7 +69,7 @@ plt.ylabel('Z')
 plt.show()
 #plt.savefig('InitialCondition2')
 
-#ahora calculamos el perfil de densidad del nuevo perfil, para ver que está bien
+# Now we calculate the density profile of the new profile , to see that it is ok
 dist= np.sqrt((x1)**2+(x2)**2+(x3)**2)
 
 shellNumber = 20
@@ -110,7 +97,7 @@ def densi(M,R,r):
 rrho=np.linspace(0,0.7,50)
 rho=densi(totalMass,R,rrho)
 
-
+# Plotting the density profile
 fig2= plt.figure()
 ax2=plt.plot(shellRadius,shellDensity,'r.',label='Data')
 plt.plot(rrho,rho,label='Analytical solution')
@@ -120,17 +107,18 @@ plt.legend()
 #plt.savefig('Density')
 plt.show()
 
-#generamos las condiciones iniciales
-#velocidades
+# We create the rest of the initial conditions to generate the hdf5
 
+#-- Initial velocities --#
 vx = np.zeros(n)
 vy = np.zeros(n)
 vz = np.zeros(n)
 
-##Energia interna
+#-- Internal energy --#
 Energy=np.zeros(n)
-Energy+=0.05 ### /particlemass
-'''
+Energy+=0.05 
+
+#-- Generation of HDF5 with the initial conditions established --#
 hf = h5py.File("myInitialConditions.hdf5", 'w')
 
 massvec=np.zeros(6)
@@ -166,4 +154,4 @@ PartType0.create_dataset("InternalEnergy", data = Energy)
 
 hf.close()
 
-'''
+
